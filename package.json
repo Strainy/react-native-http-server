@@ -1,0 +1,25 @@
+{
+  "name": "react-native-http-server",
+  "version": "0.1.0",
+  "description": "A simple http server implementation for react native Android apps",
+  "main": "httpServer.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/strainy/react-native-http-server.git"
+  },
+  "keywords": [
+    "react-component",
+    "react-native",
+    "android",
+    "nanohttpd"
+  ],
+  "author": "James Strain",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/strainy/react-native-http-server/issues"
+  },
+  "homepage": "https://github.com/strainy/react-native-http-server#readme"
+}
