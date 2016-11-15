@@ -1,6 +1,6 @@
 {
   "name": "react-native-http-server",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "A simple http server implementation for react native Android apps",
   "main": "httpServer.js",
   "scripts": {
