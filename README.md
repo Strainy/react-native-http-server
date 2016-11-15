@@ -4,6 +4,8 @@ HTTP Server for [React Native](https://github.com/facebook/react-native)
 
 Android only for now.
 
+Build on top of the NanoHttpd library: https://github.com/NanoHttpd/nanohttpd
+
 ## Install
 
 ```shell
