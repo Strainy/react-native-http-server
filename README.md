@@ -4,7 +4,7 @@ HTTP Server for [React Native](https://github.com/facebook/react-native)
 
 Android only for now.
 
-Build on top of the NanoHttpd library: https://github.com/NanoHttpd/nanohttpd
+Built on top of the NanoHttpd library: https://github.com/NanoHttpd/nanohttpd
 
 ## Install
 
@@ -98,7 +98,7 @@ See [CHANGELOG.md](https://github.com/strainy/react-native-http-server/blob/mast
 
 ## Example
 
-First import/require react-native-http-server.
+First import/require react-native-http-server:
 
 ```js
 
@@ -106,9 +106,8 @@ First import/require react-native-http-server.
 
 ```
 
-Initalise the server in the `componentWillMount` lifecycle method.
 
-When initalising, you will provide a options object (only the `port` property is accepted for now) and a callback where you will capture requests and return responses.
+Initalise the server in the `componentWillMount` lifecycle method. When initalising, you'll provide an options object (only the `port` property is accepted for now) and a callback where requests will be captured and responses returned.
 
 ```js
 
@@ -156,7 +155,7 @@ When initalising, you will provide a options object (only the `port` property is
 
 ```
 
-It's also a good idea to disable the server when your component is being unmounted.
+Finally, ensure that you disable the server when your component is being unmounted.
 
 ```js
 
