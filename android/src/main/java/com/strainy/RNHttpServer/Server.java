@@ -114,7 +114,7 @@ public class Server extends NanoHTTPD {
                           response.getString("data") );
 
       // Add headers to the response
-      ReadableMap rnHeaders = response.getMap("headers");
+      /*ReadableMap rnHeaders = response.getMap("headers");
       com.facebook.react.bridge.ReadableMapKeySetIterator iterator = rnHeaders.keySetIterator();
       if (!iterator.hasNextKey()) {
           return null;
@@ -123,7 +123,12 @@ public class Server extends NanoHTTPD {
           String key = iterator.nextKey();
           Log.d(TAG, key + "=" + rnHeaders.getString(key));
           res.addHeader(key, rnHeaders.getString(key));
-      }
+      }*/
+      res.addHeader("Access-Control-Allow-Origin", "*");
+      res.addHeader("Access-Control-Max-Age", "3628800");
+      res.addHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+      res.addHeader("Access-Control-Allow-Headers", "X-Requested-With");
+      res.addHeader("Access-Control-Allow-Headers", "Authorization");
 
       return res;
 
