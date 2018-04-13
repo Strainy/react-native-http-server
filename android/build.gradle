@@ -19,7 +19,7 @@ android {
 }
 
 dependencies {
-    compile 'com.facebook.react:react-native:+'
-    compile 'com.google.android.gms:play-services-gcm:+'
-    compile 'org.nanohttpd:nanohttpd:2.2.0'
+    implementation 'com.facebook.react:react-native:+'
+    implementation 'com.google.android.gms:play-services-gcm:+'
+    implementation 'org.nanohttpd:nanohttpd:2.2.0'
 }
