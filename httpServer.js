@@ -43,7 +43,7 @@ module.exports = {
         nativeServerModule.init(options);
     },
 
-    start: nativeServerModule.start,
+    start: nativeServerModule != null ? nativeServerModule.start : undefined,
 
-    stop: nativeServerModule.stop,
+    stop: nativeServerModule != null ? nativeServerModule.stop : undefined,
 }
