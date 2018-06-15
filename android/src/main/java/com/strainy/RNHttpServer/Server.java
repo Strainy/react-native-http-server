@@ -1,20 +1,21 @@
 package com.strainy.RNHttpServer;
 
-import fi.iki.elonen.NanoHTTPD;
-import com.facebook.react.bridge.ReactContext;
+import android.support.annotation.Nullable;
+import android.util.Log;
 import com.facebook.react.bridge.Arguments;
+import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.modules.core.DeviceEventManagerModule;
+import fi.iki.elonen.NanoHTTPD;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.HashMap;
-
-import android.support.annotation.Nullable;
-import android.util.Log;
-
-import java.io.IOException;
 
 public class Server extends NanoHTTPD {
 
@@ -102,10 +103,36 @@ public class Server extends NanoHTTPD {
 
         Log.d(TAG, "Sending response for " + session.getUri());
 
-        Response res = newFixedLengthResponse(
-            Response.Status.valueOf(response.getString("status")),
-            response.getString("type"),
-            response.getString("data"));
+        Response.Status status = Response.Status.valueOf(response.getString("status"));
+        String type = response.getString("type");
+        ReadableMap responseContent = response.getMap("content");
+
+        Response res;
+        if (responseContent.hasKey("data")) {
+            String data = responseContent.getString("data");
+
+            res = newFixedLengthResponse(status, type, data);
+        } else if (responseContent.hasKey("filePath")) {
+            String filePath = responseContent.getString("filePath");
+
+            try {
+                File file = new File(filePath);
+                long responseLength = file.length();
+                FileInputStream fileInputStream = new FileInputStream(file);
+
+                res = newFixedLengthResponse(status, type, fileInputStream, responseLength);
+            } catch (FileNotFoundException e) {
+                errorStatus = Response.Status.INTERNAL_ERROR;
+                errorText = "File not found: " + filePath;
+
+                return newFixedLengthResponse(errorStatus, MIME_PLAINTEXT, errorText);
+            }
+        } else {
+            errorStatus = Response.Status.INTERNAL_ERROR;
+            errorText = "Response is neither file nor text, which is not supported";
+
+            return newFixedLengthResponse(errorStatus, MIME_PLAINTEXT, errorText);
+        }
 
         // Add headers to the response
         res.addHeader("Access-Control-Allow-Origin", "*");
@@ -115,7 +142,6 @@ public class Server extends NanoHTTPD {
         res.addHeader("Access-Control-Allow-Headers", "Authorization");
 
         return res;
-
     }
 
     // Convenience method for triggering events in react-native
@@ -127,7 +153,6 @@ public class Server extends NanoHTTPD {
 
     // Convert Java maps to WritableMaps for passing to JS
     private WritableMap convertToWritableMap(Map map) {
-
         WritableMap request = Arguments.createMap();
 
         // iterate over map keys and put values into WritableMap
