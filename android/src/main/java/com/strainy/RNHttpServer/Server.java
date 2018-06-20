@@ -40,7 +40,13 @@ public class Server extends NanoHTTPD {
 
     @Override
     public Response serve(IHTTPSession session) {
-        Log.d(TAG, "Server receiving request.");
+        String url = session.getUri();
+        String queryParameters = session.getQueryParameterString();
+        if (queryParameters != null) {
+            url = url + "?" + queryParameters;
+        }
+
+        Log.d(TAG, "Receiving request: " + url);
 
         Response.Status errorStatus = null;
         String errorText = "";
@@ -51,7 +57,7 @@ public class Server extends NanoHTTPD {
 
         // build request to send to react-native
         Method method = session.getMethod();
-        request.putString("url", session.getUri());
+        request.putString("url", url);
         request.putString("method", method.toString());
         request.putMap("headers", this.convertToWritableMap(session.getHeaders()));
         request.putString("queryString", session.getQueryParameterString());
@@ -74,10 +80,10 @@ public class Server extends NanoHTTPD {
         this.sendEvent(reactContext, SERVER_EVENT_ID, request);
 
         // wait for response
-        while (!this.response.containsKey(session.getUri()) && (timer < timeout)) {
+        while (!this.response.containsKey(url) && (timer < timeout)) {
             try {
                 Thread.sleep(interval);
-                Log.d(TAG, "waiting for " + session.getUri() + " - " + timer + "ms");
+                Log.d(TAG, "waiting for " + url + " - " + timer + "ms");
             } catch (InterruptedException e) {
                 Log.e(TAG, e.getMessage());
                 errorStatus = Response.Status.INTERNAL_ERROR;
@@ -89,7 +95,7 @@ public class Server extends NanoHTTPD {
         }
 
         // if after waiting x seconds, no response has been logged, throw a 404 response
-        if (!this.response.containsKey(session.getUri())) {
+        if (!this.response.containsKey(url)) {
             errorStatus = Response.Status.NOT_FOUND;
             errorText = "Resource not found";
         }
@@ -97,11 +103,11 @@ public class Server extends NanoHTTPD {
         if (errorStatus != null) {
             return newFixedLengthResponse(errorStatus, MIME_PLAINTEXT, errorText);
         } else {
-            response = this.response.get(session.getUri());
-            this.response.remove(session.getUri()); // clear responses
+            response = this.response.get(url);
+            this.response.remove(url); // clear responses
         }
 
-        Log.d(TAG, "Sending response for " + session.getUri());
+        Log.d(TAG, "Sending response for " + url);
 
         Response.Status status = Response.Status.valueOf(response.getString("status"));
         String type = response.getString("type");
