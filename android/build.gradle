@@ -20,6 +20,6 @@ android {
 
 dependencies {
     implementation 'com.facebook.react:react-native:+'
-    implementation 'com.google.android.gms:play-services-gcm:+'
+    implementation 'com.google.android.gms:play-services-gcm:16.0.0'
     implementation 'org.nanohttpd:nanohttpd:2.2.0'
 }
