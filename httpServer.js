@@ -1,106 +1,49 @@
 /**
  * @providesModule react-native-http-server
  */
- 'use strict';
+'use strict';
 
- import { DeviceEventEmitter } from 'react-native';
- import { NativeModules } from 'react-native';
- var RNHS = NativeModules.RNHttpServer;
+import {DeviceEventEmitter} from 'react-native';
+import {NativeModules} from 'react-native';
 
- var validStatusCodes = [ 'ACCEPTED',
-                          'BAD_REQUEST',
-                          'CREATED',
-                          'FORBIDDEN',
-                          'INTERNAL_ERROR',
-                          'METHOD_NOT_ALLOWED',
-                          'NO_CONTENT',
-                          'NOT_FOUND',
-                          'NOT_MODIFIED',
-                          'OK',
-                          'PARTIAL_CONTENT',
-                          'RANGE_NOT_SATISFIABLE',
-                          'REDIRECT',
-                          'UNAUTHORIZED' ];
+const validStatusCodes = [
+    'ACCEPTED', 'BAD_REQUEST', 'CREATED', 'FORBIDDEN', 'INTERNAL_ERROR', 'METHOD_NOT_ALLOWED',
+    'NO_CONTENT', 'NOT_FOUND', 'NOT_MODIFIED', 'OK', 'PARTIAL_CONTENT', 'RANGE_NOT_SATISFIABLE',
+    'REDIRECT', 'UNAUTHORIZED',
+];
 
- module.exports = {
+const nativeServerModule = NativeModules.RNHttpServer;
 
-   // create the server and listen/respond to requests
-   create: function(options, callback) {
+module.exports = {
+    init: (options, callback) => {
+        // listen for new requests and retrieve appropriate response
+        DeviceEventEmitter.addListener('reactNativeHttpServerResponse', async function (request) {
+            let response = await new Promise((resolve) => { callback(request, resolve); })
 
-     //Validate port
-     if(options.port == 80){
-       throw "Invalid server port specified. Port 80 is reserved.";
-     }
+            //Validate status code
+            if (validStatusCodes.indexOf(response.status) === -1) {
+                throw new Error("Invalid response status code specified in RNHttpServer options.");
+            }
 
-     // fire up the server
-     RNHS.init(options, function() {
+            if (response.type == null) {
+                response.type = "text/plain";
+            }
 
-       // listen for new requests and retrieve appropriate response
-       DeviceEventEmitter.addListener('reactNativeHttpServerResponse', function(request) {
+            if (response.data == null) {
+                response.data = "";
+            }
 
-         var success = true;
+            if (response.headers == null) {
+                response.headers = {};
+            }
 
-         var promise = new Promise(function(resolve, reject){
-           callback(request, resolve);
-         })
-         .then(function(response){
+            nativeServerModule.setResponse(request.url, response);
+        });
 
-           //Validate status code
-           if(validStatusCodes.indexOf(response.status) === 0){
-             success = false;
-             throw "Invalid response status code specified in RNHttpServer options.";
-           }
+        nativeServerModule.init(options);
+    },
 
-           //Set default MIME_TYPE
-           if(response.type === null){
-             response.type = "text/plain";
-           }
+    start: nativeServerModule != null ? nativeServerModule.start : undefined,
 
-           //Set default data field to zero length string
-           if(response.data === null){
-             response.data = "";
-           }
-
-           if(response.headers === null){
-             response.headers = {};
-           }
-
-           if(success){
-             RNHS.setResponse(request.url, response);
-           }
-
-         });
-
-       });
-
-     }, function(e){
-       throw "Could not initialise server: " + e;
-     });
-
-   },
-
-   // attempt to start the instance of the server - returns a promise object that will be rejected or approved
-   start: function() {
-
-     var promise = new Promise(function(resolve, reject){
-
-       RNHS.start(function(){
-         resolve();
-       }, function(){
-         reject();
-       });
-
-     });
-
-     return promise;
-
-   },
-
-   // effectively pause the instance of the server
-   stop: function() {
-
-     RNHS.stop();
-
-   }
-
- }
+    stop: nativeServerModule != null ? nativeServerModule.stop : undefined,
+}
